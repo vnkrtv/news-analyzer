@@ -6,7 +6,6 @@ from news_analyzer.modules.text_processor.base_text_processor import BaseTextPro
 
 
 class RuTextProcessor(BaseTextProcessor):
-
     async def tokenize(self, text: str) -> List[str]:
         return [token.text for token in razdel.tokenize(text)]
 

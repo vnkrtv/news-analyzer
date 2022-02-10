@@ -5,7 +5,6 @@ from news_analyzer.modules.text_loader.base_loader import BaseLoader
 
 
 class FileLoader(BaseLoader, ABC):
-
     @abstractmethod
     async def read_file(self, file_name: str) -> List[str]:
         raise NotImplementedError

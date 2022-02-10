@@ -3,15 +3,12 @@ from typing import List, Dict, Optional
 from natasha import (
     Segmenter,
     MorphVocab,
-
     NewsEmbedding,
     NewsMorphTagger,
     NewsSyntaxParser,
     NewsNERTagger,
     NamesExtractor,
-
     PER,
-
     Doc,
 )
 from natasha.doc import DocSpan
@@ -53,12 +50,12 @@ class NERExtractor(BaseNerExtractor):
         if not span.fact:
             return None
         facts = span.fact.as_dict
-        if 'last' not in facts:
+        if "last" not in facts:
             return None
-        if 'first' in facts:
+        if "first" in facts:
             person = f"{facts['first']} {facts['last']}"
         else:
-            person = facts['last']
+            person = facts["last"]
         return NamedEntity(text=person, type=span.type)
 
     def extract(self, text: str) -> List[NamedEntity]:

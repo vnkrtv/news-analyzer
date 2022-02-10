@@ -10,4 +10,3 @@ from news_analyzer.db.manager.base_manager import BaseModelManager
 class ArticleSourceManager(BaseModelManager):
     def __init__(self, engine: AsyncEngine):
         super().__init__(article_sources_table, engine)
-

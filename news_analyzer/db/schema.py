@@ -11,7 +11,7 @@ from sqlalchemy import (
     Numeric,
     Text,
     DateTime,
-    Enum
+    Enum,
 )
 
 convention = {
@@ -34,15 +34,15 @@ metadata = MetaData(naming_convention=convention)
 
 @unique
 class TextSourceType(Enum):
-    rss = 'rss'
-    file = 'file'
+    rss = "rss"
+    file = "file"
 
 
 @unique
 class EntityType(Enum):
-    LOC = 'LOC'
-    ORG = 'ORG'
-    PER = 'PER'
+    LOC = "LOC"
+    ORG = "ORG"
+    PER = "PER"
 
 
 article_sources_table = Table(
@@ -54,11 +54,8 @@ article_sources_table = Table(
         Identity(start=1),
         primary_key=True,
     ),
-    Column(
-        "src_type",
-        Enum(TextSourceType)
-    ),
-    Column("src", String)
+    Column("src_type", Enum(TextSourceType)),
+    Column("src", String),
 )
 
 articles_table = Table(
@@ -78,7 +75,7 @@ articles_table = Table(
     Column("negative_sentiment", Numeric(6, 5, asdecimal=False), nullable=False),
     Column("positive_sentiment", Numeric(6, 5, asdecimal=False), nullable=False),
     Column("skip_sentiment", Numeric(6, 5, asdecimal=False), nullable=False),
-    Column("speech_sentiment", Numeric(6, 5, asdecimal=False), nullable=False)
+    Column("speech_sentiment", Numeric(6, 5, asdecimal=False), nullable=False),
 )
 
 named_entities_table = Table(
@@ -92,5 +89,5 @@ named_entities_table = Table(
         nullable=False,
     ),
     Column("name", String(500), nullable=False),
-    Column("entity_type", Enum(EntityType), nullable=False)
+    Column("entity_type", Enum(EntityType), nullable=False),
 )

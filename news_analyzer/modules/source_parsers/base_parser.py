@@ -2,8 +2,7 @@ from typing import List, Any
 from abc import abstractmethod, ABC
 
 
-class BaseParser(ABC):
-
+class BaseSourceParser(ABC):
     @abstractmethod
-    def parse(self, text: str):
+    async def parse(self, src_text: str) -> str:
         raise NotImplementedError

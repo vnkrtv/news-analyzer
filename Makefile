@@ -2,8 +2,8 @@
 include deploy/.env.test
 export
 
-PROJECT_NAME := yaps
-PROJECT_SRC := yaps
+PROJECT_NAME := news_analyzer
+PROJECT_SRC := news_analyzer
 VERSION := 0.1
 
 IMAGE_NAME := yaps

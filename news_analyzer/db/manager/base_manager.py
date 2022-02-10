@@ -9,7 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 class BaseModelManager(ABC):
     engine: AsyncEngine
-    es: AsyncElasticsearch
     model_table: Table
 
     def __init__(
@@ -19,12 +18,12 @@ class BaseModelManager(ABC):
         self.model_table = model_table
         self.es = es
 
-    async def all(self) -> List[dict]:
+    async def __all(self) -> List[dict]:
         async with self.engine.connect() as conn:
             result = await conn.execute(select(self.model_table))
             return result.mappings().all()
 
-    async def create(self, obj: dict):
+    async def __create(self, obj: dict):
         async with self.engine.connect() as conn:
             await conn.execute(insert(self.model_table).values(**obj))
             await conn.commit()

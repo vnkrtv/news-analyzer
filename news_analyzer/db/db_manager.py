@@ -2,9 +2,9 @@ import time
 
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from yaps.db.manager.offer_manager import OfferManager
-from yaps.db.manager.product_manager import ProductManager
-from yaps.utils.db import is_available_postgres
+from news_analyzer.db.manager.article_manager import ArticleManager
+from news_analyzer.db.manager.articles_source_manager import ArticlesSourceManager
+from news_analyzer.db.manager.named_entity_manager import NamedEntityManager
 
 
 class DBManager:
@@ -14,17 +14,13 @@ class DBManager:
         self.engine = engine
 
     @property
-    def products(self) -> ProductManager:
-        return ProductManager(engine=self.engine)
+    def articles_sources(self) -> ArticlesSourceManager:
+        return ArticlesSourceManager(engine=self.engine)
 
     @property
-    def offers(self) -> OfferManager:
-        return OfferManager(engine=self.engine)
+    def articles(self) -> ArticleManager:
+        return ArticleManager(engine=self.engine)
 
-    async def check_conn_with_retries(
-        self, retries: int = 5, timeout: float = 1
-    ) -> bool:
-        while not await is_available_postgres(self.engine) and retries > 1:
-            retries -= 1
-            time.sleep(timeout)
-        return await is_available_postgres(self.engine)
+    @property
+    def named_entities(self) -> NamedEntityManager:
+        return NamedEntityManager(engine=self.engine)

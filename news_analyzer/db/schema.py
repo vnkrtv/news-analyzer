@@ -33,7 +33,7 @@ metadata = MetaData(naming_convention=convention)
 
 
 @unique
-class TextSourceType(Enum):
+class TextSourceType(str, Enum):
     rss = "rss"
     file = "file"
 
@@ -45,8 +45,8 @@ class EntityType(Enum):
     PER = "PER"
 
 
-article_sources_table = Table(
-    "article_sources",
+articles_sources_table = Table(
+    "articles_sources",
     metadata,
     Column(
         "src_id",

@@ -4,19 +4,19 @@ services:
 
   db:
     image: postgres:13.0
-    container_name: yaps-db
+    container_name: news-analyzer-db
     env_file:
       - ./deploy/.env.prod
     volumes:
-      - yaps_db_data:/var/lib/postgresql/data/
+      - news-analyzer-db-data:/var/lib/postgresql/data/
     networks:
-      - yaps_net
+      - news-analyzer-net
 
   cache:
     image: redis:6.2.6
-    container_name: yaps-cache
+    container_name: news-analyzer-cache
     networks:
-      - yaps_net
+      - news-analyzer-net
 
   yaps:
     build: .
@@ -43,27 +43,27 @@ services:
       - cache
       - elasticsearch
     networks:
-      - yaps_net
+      - news-analyzer-net
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
-    container_name: yaps-elastic
-    volumes:
-      - yaps_elastic_data:/usr/share/elasticsearch/data
+  task-processor:
+    build: .
+    image: task-processor:0.0.1
+    container_name: task-processor
+    env_file:
+      - ./deploy/.env.prod
     environment:
-      - node.name=yaps-node
-      - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - POSTGRES_HOSTS=db
+    entrypoint: run-task-processor
+    depends_on:
+      - db
+      - cache
+      - rmq
     networks:
-      - yaps_net
-    ports:
-      - 0.0.0.0:9200:9200
-      - 0.0.0.0:9300:9300
+      - news-analyzer-net
 
 
 volumes:
-  yaps_db_data:
-  yaps_elastic_data:
+  news-analyzer-db-data:
 
 networks:
-  yaps_net:
+  news-analyzer-net:

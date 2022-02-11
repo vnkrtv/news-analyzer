@@ -1,5 +1,7 @@
-from typing import List
+import time
+from typing import List, Optional
 
+from news_analyzer.errors.task_processing_errors import SourceNotFoundError
 from news_analyzer.modules.articles_getter.schemas.loaded_article import LoadedArticle
 from news_analyzer.modules.loader.base_loader import BaseLoader
 from news_analyzer.modules.parsers.base_article_parser import BaseArticleParser
@@ -8,14 +10,14 @@ from news_analyzer.text_sources_config import TEXT_SOURCES_CONFIG
 
 
 class ArticlesGetter:
-
     def __init__(
-            self,
-            src: str,
-            source_loader: BaseLoader,
-            source_parser: BaseSourceParser,
-            text_loader: BaseLoader,
-            text_parser: BaseArticleParser
+        self,
+        src: str,
+        source_loader: BaseLoader,
+        source_parser: BaseSourceParser,
+        text_loader: BaseLoader,
+        text_parser: BaseArticleParser,
+        **kwargs,
     ):
         self.src = src
 
@@ -24,18 +26,21 @@ class ArticlesGetter:
         self.text_loader = text_loader
         self.text_parser = text_parser
 
+        self.timeout = kwargs.get("timeout")
+
     @classmethod
-    def get_for_src(cls, src: str):
+    def get_for_src(cls, src: str, **kwargs):
         text_src_config = TEXT_SOURCES_CONFIG.get(src)
         if not text_src_config:
-            raise Exception
+            raise SourceNotFoundError(f'src "{src}" not found in TEXT_SOURCES_CONFIG')
 
         return cls(
             src=src,
-            source_loader=text_src_config.get('source_loader')(),
-            source_parser=text_src_config.get('source_parser')(),
-            text_loader=text_src_config.get('text_loader')(),
-            text_parser=text_src_config.get('text_parser')()
+            source_loader=text_src_config.get("source_loader")(),
+            source_parser=text_src_config.get("source_parser")(),
+            text_loader=text_src_config.get("text_loader")(),
+            text_parser=text_src_config.get("text_parser")(),
+            **kwargs,
         )
 
     async def get_articles(self) -> List[LoadedArticle]:
@@ -52,5 +57,8 @@ class ArticlesGetter:
                     src=src,
                 )
             )
+
+            if self.timeout:
+                time.sleep(self.timeout)
 
         return loaded_texts

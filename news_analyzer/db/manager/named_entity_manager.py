@@ -17,3 +17,6 @@ class NamedEntityManager(BaseModelManager):
 
     async def create(self, entity: InputNamedEntity) -> None:
         await self.__create(entity.dict())
+
+    async def bulk_create(self, entities: List[InputNamedEntity]) -> None:
+        await self.__bulk_create([_.dict() for _ in entities])

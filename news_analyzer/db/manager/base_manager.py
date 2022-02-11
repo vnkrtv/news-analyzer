@@ -28,6 +28,11 @@ class BaseModelManager(ABC):
             await conn.execute(insert(self.model_table).values(**obj))
             await conn.commit()
 
+    async def __bulk_create(self, objects: List[dict]):
+        async with self.engine.connect() as conn:
+            await conn.execute(insert(self.model_table), objects)
+            await conn.commit()
+
     @property
     def now(self) -> datetime:
         return datetime.utcnow()

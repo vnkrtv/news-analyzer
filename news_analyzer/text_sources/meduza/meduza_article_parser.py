@@ -17,5 +17,5 @@ class MeduzaArticleParser(BaseArticleParser):
         return " ".join(texts)
 
     def parse(self, text: str) -> ArticleInfo:
-        soup = BeautifulSoup(text, 'html.parser')
+        soup = BeautifulSoup(text, "html.parser")
         return ArticleInfo()

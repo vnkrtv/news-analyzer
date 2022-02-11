@@ -109,4 +109,8 @@ class Config:
     class General:
         prod = False if getenv("PROD") is None else True
 
+    class TaskProducer:
+        interval: float = 600
+        timeout: float = 1
+
     nginx_logs_path = pathlib.Path("/var/log/nginx/access.log")

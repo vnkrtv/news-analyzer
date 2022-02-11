@@ -1,5 +1,8 @@
+from news_analyzer.errors.task_processing_errors import SourceNotFoundError
 from news_analyzer.modules.ner_extractor.base_ner_extractor import BaseNerExtractor
-from news_analyzer.modules.text_analyzer.schemas.analyzed_text_info import AnalyzedTextInfo
+from news_analyzer.modules.text_analyzer.schemas.analyzed_text_info import (
+    AnalyzedTextInfo,
+)
 from news_analyzer.modules.tonality_determinant.base_tonality_determanant import (
     BaseTonalityDeterminant,
 )
@@ -7,7 +10,6 @@ from news_analyzer.text_sources_config import TEXT_SOURCES_CONFIG
 
 
 class TextAnalyzer:
-
     def __init__(
         self,
         tonality_determinant: BaseTonalityDeterminant,
@@ -20,11 +22,11 @@ class TextAnalyzer:
     def get_for_src(cls, src: str):
         text_src_config = TEXT_SOURCES_CONFIG.get(src)
         if not text_src_config:
-            raise Exception
+            raise SourceNotFoundError(f'src "{src}" not found in TEXT_SOURCES_CONFIG')
 
         return cls(
-            tonality_determinant=text_src_config.get('tonality_determinant')(),
-            ner_extractor=text_src_config.get('ner_extractor')()
+            tonality_determinant=text_src_config.get("tonality_determinant")(),
+            ner_extractor=text_src_config.get("ner_extractor")(),
         )
 
     async def analyze(self, text: str) -> AnalyzedTextInfo:

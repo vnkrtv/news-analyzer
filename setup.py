@@ -5,7 +5,7 @@ from typing import List
 from pkg_resources import parse_requirements
 from setuptools import find_packages, setup
 
-module_name = 'yaps'
+module_name = 'news_analyzer'
 
 module = SourceFileLoader(
     module_name, os.path.join(module_name, '__init__.py')
@@ -40,8 +40,7 @@ setup(
         'console_scripts': [
             '{0}-api = {0}.__main__:main'.format(module_name),
             '{0}-db = {0}.db.__main__:main'.format(module_name),
-            '{0}-init-es = {0}.es.__main__:main'.format(module_name),
-            '{0}-read-nginx-logs = {0}.utils.log_parser.__main__:main'.format(module_name)
+            'run-task-processor = {0}.modules.task_processor._main__:main'
         ]
     },
     include_package_data=True

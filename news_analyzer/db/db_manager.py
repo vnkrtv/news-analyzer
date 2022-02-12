@@ -1,5 +1,3 @@
-import time
-
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from news_analyzer.db.manager.article_manager import ArticleManager

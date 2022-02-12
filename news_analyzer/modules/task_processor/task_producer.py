@@ -22,7 +22,10 @@ def get_task_type(src_type: TextSourceType) -> str:
 def get_task_description(source: ArticlesSource) -> dict:
     if source.src_type == TextSourceType.rss:
         return LoadTextTaskDescription(
-            src=source.src, src_id=source.src_id, timeout=Config.TaskProducer.timeout
+            src_name=source.name,
+            src=source.src,
+            src_id=source.src_id,
+            timeout=Config.TaskProducer.timeout,
         ).dict()
 
 

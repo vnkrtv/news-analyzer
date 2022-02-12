@@ -3,12 +3,12 @@ Service settings
 """
 import logging
 import pathlib
+from datetime import timedelta
 from os import getenv
 
 import yarl
 
 from aiohttp_cache import RedisConfig
-from pydantic.datetime_parse import timedelta
 
 
 class Config:
@@ -36,13 +36,6 @@ class Config:
     # The root path for media
     media_root = "/media/"
 
-    elastic_enabled = False
-
-    class Elastic:
-        hosts = getenv("ES_HOSTS", "0.0.0.0:9200").split(",")
-        shards_num = int(getenv("ES_SHARDS_NUM", "2"))
-        replicas_num = int(getenv("ES_REPLICAS_NUM", "2"))
-
     class DB:
         config = {
             # asyncpg не может в dsn с несколькими хостами, поэтому костылим
@@ -50,7 +43,7 @@ class Config:
             "hosts": getenv("POSTGRES_HOSTS", "localhost:5432").split(",")[0],
             "password": getenv("POSTGRES_PWD", "password"),
             "user": getenv("POSTGRES_USER", "root"),
-            "database": getenv("POSTGRES_DB", "yaps"),
+            "database": getenv("POSTGRES_DB", "news_analyzer"),
         }
 
         test_config = {
@@ -66,8 +59,6 @@ class Config:
         pool_size = int(getenv("POOL_SIZE", 10))
         consumer_pool_size = int(getenv("CONSUMER_POOL_SIZE", 4))
 
-        elasticsearch_hosts = getenv("ES_HOSTS", "").split(";")
-
     class Cache:
         class CacheType:
             memory = "memory"
@@ -80,11 +71,6 @@ class Config:
 
         cache_type = CacheType.all_types.get(getenv("CACHE_TYPE"), CacheType.memory)
         backend_config = None if cache_type is CacheType.memory else RedisConfig.config
-
-    class YandexOAuth:
-        auth_url = "https://oauth.yandex.ru/authorize"
-        login_url = "https://login.yandex.ru/info"
-        app_id = getenv("YANDEX_PASSPORT_APP_ID")
 
     class Auth:
         auth_header = "Authorization"
@@ -100,17 +86,9 @@ class Config:
             echo = bool(getenv("ECHO_DB"))
             echo_pool = bool(getenv("ECHO_POOL"))
 
-    class AlertBot:
-        token = getenv("ALERT_BOT_TOKEN")
-        chat_id = int(getenv("ALERT_CHAT_ID"))
-        lay_down_cat = getenv("LAY_DOWN_CAT")
-        stand_up_cat = getenv("STAND_UP_CAT")
-
     class General:
         prod = False if getenv("PROD") is None else True
 
     class TaskProducer:
         interval: float = 600
         timeout: float = 1
-
-    nginx_logs_path = pathlib.Path("/var/log/nginx/access.log")

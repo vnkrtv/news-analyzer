@@ -11,7 +11,7 @@ from sqlalchemy import (
     Numeric,
     Text,
     DateTime,
-    Enum,
+    Enum as DbEnum,
 )
 
 convention = {
@@ -54,7 +54,8 @@ articles_sources_table = Table(
         Identity(start=1),
         primary_key=True,
     ),
-    Column("src_type", Enum(TextSourceType)),
+    Column("name", String, unique=True),
+    Column("src_type", DbEnum(TextSourceType)),
     Column("src", String),
 )
 
@@ -65,7 +66,7 @@ articles_table = Table(
     Column(
         "src_id",
         Integer,
-        ForeignKey("article_sources.src_id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey("articles_sources.src_id", onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False,
     ),
     Column("title", String(500), nullable=False),
@@ -89,5 +90,5 @@ named_entities_table = Table(
         nullable=False,
     ),
     Column("name", String(500), nullable=False),
-    Column("entity_type", Enum(EntityType), nullable=False),
+    Column("entity_type", DbEnum(EntityType), nullable=False),
 )

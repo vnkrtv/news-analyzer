@@ -29,10 +29,12 @@ class ArticlesGetter:
         self.timeout = kwargs.get("timeout")
 
     @classmethod
-    def get_for_src(cls, src: str, **kwargs):
-        text_src_config = TEXT_SOURCES_CONFIG.get(src)
+    def get_for_src(cls, src_name: str, src: str, **kwargs):
+        text_src_config = TEXT_SOURCES_CONFIG.get(src_name)
         if not text_src_config:
-            raise SourceNotFoundError(f'src "{src}" not found in TEXT_SOURCES_CONFIG')
+            raise SourceNotFoundError(
+                f'src "{src_name}" not found in TEXT_SOURCES_CONFIG'
+            )
 
         return cls(
             src=src,

@@ -29,26 +29,30 @@ class TaskProcessor:
     async def __process_load_text_task(
         self, description: LoadTextTaskDescription
     ) -> None:
-        src, src_id = description.src, description.src_id
+        src_name, src, src_id = (
+            description.src_name,
+            description.src,
+            description.src_id,
+        )
 
         try:
             articles_getter = ArticlesGetter.get_for_src(
-                src=src, timeout=description.timeout
+                src_name=src_name, src=src, timeout=description.timeout
             )
-            text_analyzer = TextAnalyzer.get_for_src(src=src)
+            text_analyzer = TextAnalyzer.get_for_src(src_name=src_name)
         except SourceNotFoundError as e:
             logging.error(e)
             return
 
         articles = await articles_getter.get_articles()
-        logging.info("load %d articles from %s", len(articles), src)
+        logging.info("load %d articles from '%s'", len(articles), src_name)
 
         for loaded_article in articles:
             article_info = loaded_article.article_info
             text_analysis_info = await text_analyzer.analyze(text=article_info.text)
 
             article = InputArticle(
-                src_id=description["src_id"],
+                src_id=src_id,
                 title=article_info.title,
                 text=article_info.text,
                 date=article_info.date,
@@ -65,7 +69,7 @@ class TaskProcessor:
                 speech_sentiment=text_analysis_info.sentiment.get(SentimentType.SPEECH),
             )
             article = await self.db.articles.create_and_return(article)
-            logging.info("load article %s from %s to db", article.title, src)
+            logging.info("load article '%s' from '%s' to db", article.title, src_name)
 
             entities = []
             for entity in text_analysis_info.entities:
@@ -79,8 +83,8 @@ class TaskProcessor:
 
             await self.db.named_entities.bulk_create(entities)
             logging.info(
-                "load %d entities from article %s from %s to db",
+                "load %d entities from article '%s' from '%s' to db",
                 len(entities),
                 article.title,
-                src,
+                src_name,
             )

@@ -19,10 +19,12 @@ class TextAnalyzer:
         self.ner_extractor = ner_extractor
 
     @classmethod
-    def get_for_src(cls, src: str):
-        text_src_config = TEXT_SOURCES_CONFIG.get(src)
+    def get_for_src(cls, src_name: str):
+        text_src_config = TEXT_SOURCES_CONFIG.get(src_name)
         if not text_src_config:
-            raise SourceNotFoundError(f'src "{src}" not found in TEXT_SOURCES_CONFIG')
+            raise SourceNotFoundError(
+                f'src "{src_name}" not found in TEXT_SOURCES_CONFIG'
+            )
 
         return cls(
             tonality_determinant=text_src_config.get("tonality_determinant")(),

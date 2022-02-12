@@ -2,8 +2,8 @@ from alembic import context
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-from yaps.db.schema import metadata
-from yaps.settings import Config
+from news_analyzer.db.schema import metadata
+from news_analyzer.settings import Config
 
 config = context.config
 target_metadata = metadata

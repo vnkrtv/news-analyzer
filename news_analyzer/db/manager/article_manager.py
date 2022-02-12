@@ -13,10 +13,10 @@ class ArticleManager(BaseModelManager):
         super().__init__(articles_table, engine)
 
     async def all(self) -> List[Article]:
-        return [Article(**data) for data in await self.__all()]
+        return [Article(**data) for data in await self._all()]
 
     async def create(self, article: InputArticle) -> None:
-        await self.__create(article.dict())
+        await self._create(article.dict())
 
     async def create_and_return(self, article: InputArticle) -> Article:
         await self.create(article)

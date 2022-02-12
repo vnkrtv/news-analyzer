@@ -28,8 +28,6 @@ setup(
     version=module.__version__,
     author=module.__author__,
     email=module.__email__,
-    license=module.__license__,
-    description=module.__doc__,
     long_description=open('README.md').read(),
     platforms='all',
     python_requires='>=3.8',
@@ -40,7 +38,7 @@ setup(
         'console_scripts': [
             '{0}-api = {0}.__main__:main'.format(module_name),
             '{0}-db = {0}.db.__main__:main'.format(module_name),
-            'run-task-processor = {0}.modules.task_processor._main__:main'
+            'run-task-processor = {0}.modules.task_processor.__main__:main'.format(module_name)
         ]
     },
     include_package_data=True

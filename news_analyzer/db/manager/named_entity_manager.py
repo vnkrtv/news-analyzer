@@ -13,10 +13,10 @@ class NamedEntityManager(BaseModelManager):
         super().__init__(named_entities_table, engine)
 
     async def all(self) -> List[NamedEntity]:
-        return [NamedEntity(**data) for data in await self.__all()]
+        return [NamedEntity(**data) for data in await self._all()]
 
     async def create(self, entity: InputNamedEntity) -> None:
-        await self.__create(entity.dict())
+        await self._create(entity.dict())
 
     async def bulk_create(self, entities: List[InputNamedEntity]) -> None:
-        await self.__bulk_create([_.dict() for _ in entities])
+        await self._bulk_create([_.dict() for _ in entities])

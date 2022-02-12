@@ -46,7 +46,11 @@ class NatashaNerExtractor(BaseNerExtractor):
     @staticmethod
     def __extract_entity(span: DocSpan) -> Optional[NamedEntity]:
         if span.type != PER:
-            return NamedEntity(text=span.normal, type=span.type)
+            return (
+                NamedEntity(text=span.normal, type=span.type)
+                if span.normal and span.type
+                else None
+            )
         if not span.fact:
             return None
         facts = span.fact.as_dict

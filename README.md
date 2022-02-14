@@ -112,3 +112,103 @@ $ curl "http://localhost:8080/api/v1/analyze/entities/group_by_sources?name=Вл
   "end_date": null
 }
 ```
+
+## Adding new sources  
+
+To add a new data source, you must add its config it TEXT_SOURCES_CONFIG in news_analyzer.text_sources_config.py file and implement necessary modules.  
+Below is an example of configuring a source for regularly receiving news from the "Medusa" RSS channel:
+
+```python
+TEXT_SOURCES_CONFIG = {
+    "meduza": {
+        "source_loader": WebLoader,
+        "source_parser": text_sources.meduza.MeduzaRSSParser,
+        "text_loader": WebLoader,
+        "text_parser": text_sources.meduza.MeduzaArticleParser,
+        "ner_extractor": NatashaNerExtractor,
+        "tonality_determinant": DostoevskyTonalityDeterminant,
+        "info": {"src_type": TextSourceType.rss, "src": "https://meduza.io/rss2/all"},
+    }
+}
+```
+### source_loader
+
+Get content with links to data which should be loaded. Must implement BaseLoader (news_analyzer.modules.loaders.base_loader.py) interface:
+
+```python
+class BaseLoader(ABC):
+    @abstractmethod
+    async def load(self, src: str) -> str:
+        raise NotImplementedError
+```
+For example:
+- Get XML with last news from RSS channel (make HTTP request - that is what WebLoader does)
+- Get JSON with latest posts from VK group by API request  
+- Get JSON with latest posts on Twitter for several tags by API request
+
+### source_parser 
+
+Get list od links to data from content, which returns source_loader module. Must implement BaseSourceParser (news_analyzer.modules.parsers.base_source_parser.py) interface:
+
+```python
+class BaseSourceParser(ABC):
+    @abstractmethod
+    async def parse(self, src_text: str) -> List[str]:
+        raise NotImplementedError
+``` 
+
+For example:
+- Get list of latest news URLs from RSS channel XML (that is what MeduzaRSSParser does)
+- Get list of posts ids from JSON with latest posts from VK group  
+
+### text_loader  
+
+Get data by link (list of links we got from source_parser module). Must implement BaseLoader interface (same as source_loader module).  
+
+For example:
+- Get HTML page content by news URL (that is what WebLoader does)
+- Get JSON with post comments by API request (list of post id we got from source_parser module)  
+
+### text_parser  
+Return ArticleInfo schema by data got by text_loader module. Must implement BaseArticleParser (news_analyzer.modules.parsers.base_articles_parser.py) interface:
+```python
+class ArticleInfo(BaseSchema):
+    text: str
+    title: str
+    date: datetime
+...
+class BaseArticleParser(ABC):
+    @abstractmethod
+    async def parse(self, text: str) -> ArticleInfo:
+        raise NotImplementedError
+```  
+For example:
+- Extract title, text and publication date from HTML page content (that is what MeduzaArticleParser does)
+- Get same fields from JSON with post comments  
+
+### ner_extractor  
+Extract named entities from text. Default implementation - NatashaNerExtractor - could be left.   
+Custom implementation must implement BaseNerExtractor interface:
+```python
+class BaseNerExtractor(ABC):
+    @abstractmethod
+    def extract(self, text: str) -> List[NamedEntity]:
+        raise NotImplementedError
+```
+
+### tonality_determinant  
+Determines the tone of the text. Default implementation - DostoevskyTonalityDeterminant - could be left.   
+Custom implementation must implement BaseTonalityDeterminant interface:
+```python
+class SentimentType(str, Enum):
+    NEUTRAL: str = "neutral"
+    NEGATIVE: str = "negative"
+    POSITIVE: str = "positive"
+    SKIP: str = "skip"
+    SPEECH: str = "speech"
+...
+class BaseTonalityDeterminant(ABC):
+    @abstractmethod
+    def get_tonality(self, text: str) -> Dict[SentimentType, float]:
+        raise NotImplementedError
+```

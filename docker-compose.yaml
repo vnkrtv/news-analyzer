@@ -51,7 +51,7 @@ services:
       - ./deploy/.env.prod
     environment:
       - POSTGRES_HOSTS=db
-    entrypoint: dostoevsky download fasttext-social-network-model && news-analyzer-run-load-tasks
+    entrypoint: dostoevsky download fasttext-social-network-model | news-analyzer-run-load-tasks
     deploy:
       restart_policy:
         condition: on-failure

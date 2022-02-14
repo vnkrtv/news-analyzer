@@ -14,6 +14,7 @@ from aiohttp.web_response import StreamResponse
 from aiohttp_cache.backends import BaseCache
 
 from news_analyzer.db.db_manager import DBManager
+
 # from news_analyzer.utils.auth.auth_user import AuthUser
 
 

@@ -5,6 +5,7 @@ from typing import List, Callable
 from aiohttp import web, web_exceptions
 
 from news_analyzer.apps.base_handler import error_response, ErrMsg
+
 # from news_analyzer.apps.auth.middlewares import auth_middleware
 
 

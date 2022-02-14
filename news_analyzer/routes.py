@@ -1,6 +1,7 @@
 from aiohttp import web
 
 from news_analyzer.apps.api.routes import register_api_routes
+
 # from news_analyzer.apps.auth.routes import register_auth_routes
 from news_analyzer.settings import Config
 

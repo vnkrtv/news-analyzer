@@ -18,6 +18,6 @@ def main():
     sys.argv += ["--bind", "%s:%s" % (Config.host, Config.port)]
     sys.argv += ["--worker-class", "aiohttp.GunicornWebWorker"]
     sys.argv += ["--workers", str(Config.workers_num)]
-    sys.argv += ["yaps.app:app"]
+    sys.argv += ["news_analyzer.app:app"]
 
     sys.exit(run())

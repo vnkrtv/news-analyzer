@@ -1,3 +1,5 @@
+import re
+from datetime import datetime
 from typing import Optional
 from http import HTTPStatus
 from uuid import UUID
@@ -8,7 +10,12 @@ from aiohttp_cache import cache
 from news_analyzer.apps.base_handler import BaseHandler, json_response
 
 
-class ArticleSourcesApi(BaseHandler):
+class Ping(BaseHandler):
+    async def get(self):
+        return json_response("OK", status=HTTPStatus.OK)
+
+
+class GetArticleSources(BaseHandler):
     @cache()
     async def get(self) -> web.Response:
         """
@@ -16,14 +23,18 @@ class ArticleSourcesApi(BaseHandler):
         Get article sources
         """
 
-        articles_sources = await self.db.articles_sources.all()
-        return json_response(
-            [_.dict() for _ in articles_sources],
-            status=HTTPStatus.OK
-        )
+        src_type = self.request.query.get("type")
+        if src_type:
+            articles_sources = await self.db.articles_sources.all_by_type(
+                src_type=src_type
+            )
+        else:
+            articles_sources = await self.db.articles_sources.all()
+
+        return json_response([_.dict() for _ in articles_sources], status=HTTPStatus.OK)
 
 
-class ArticleApi(BaseHandler):
+class GetArticles(BaseHandler):
     @cache()
     async def get(self, src_id: int) -> web.Response:
         """
@@ -32,10 +43,99 @@ class ArticleApi(BaseHandler):
         """
 
         articles = await self.db.articles.all_by_src(src_id=src_id)
-        return json_response(
-            [_.dict() for _ in articles],
-            status=HTTPStatus.OK
+        return json_response([_.dict() for _ in articles], status=HTTPStatus.OK)
+
+
+class NamedEntitiesApi(BaseHandler):
+    @cache()
+    async def get(self, src_id: int) -> web.Response:
+        """
+        /source/{src_id:<int>}/articles/?[limit=<int>&cursor=<int>]
+        Get articles by source name
+        """
+
+        articles = await self.db.articles.all_by_src(src_id=src_id)
+        return json_response([_.dict() for _ in articles], status=HTTPStatus.OK)
+
+
+class GetNamedEntitiesTonality(BaseHandler):
+    async def get(self) -> web.Response:
+        """
+        /analyze/entities/all?[src_id=<int>&entity_id=<int>&start_date_ts=<int>&end_date_ts=<int>]
+        Get articles by source name
+        """
+
+        try:
+            src_id = int(self.request.query.get("src_id"))
+        except (TypeError, ValueError):
+            src_id = None
+
+        try:
+            entity_id = int(self.request.query.get("entity_id"))
+        except (TypeError, ValueError):
+            entity_id = None
+
+        try:
+            start_date = datetime.fromtimestamp(
+                int(self.request.query.get("start_date_ts"))
+            )
+        except (TypeError, ValueError):
+            start_date = None
+
+        try:
+            end_date = datetime.fromtimestamp(
+                int(self.request.query.get("end_date_ts"))
+            )
+        except (TypeError, ValueError):
+            end_date = None
+
+        entities = await self.db.named_entities.group_by_name(
+            src_id=src_id,
+            entity_id=entity_id,
+            start_date=start_date,
+            end_date=end_date,
         )
+        return json_response(entities.dict(), status=HTTPStatus.OK)
+
+
+class GetNamedEntitiesTonalityBySources(BaseHandler):
+    async def get(self) -> web.Response:
+        """
+        /analyze/entities/group_by_sources{entity_id:<int>}?[src_id=<int>&entity_id=<int>&start_date_ts=<int>&end_date_ts=<int>]
+        Get articles by source name
+        """
+
+        try:
+            src_id = int(self.request.query.get("src_id"))
+        except (TypeError, ValueError):
+            src_id = None
+
+        try:
+            entity_id = int(self.request.query.get("entity_id"))
+        except (TypeError, ValueError):
+            entity_id = None
+
+        try:
+            start_date = datetime.fromtimestamp(
+                int(self.request.query.get("start_date_ts"))
+            )
+        except (TypeError, ValueError):
+            start_date = None
+
+        try:
+            end_date = datetime.fromtimestamp(
+                int(self.request.query.get("end_date_ts"))
+            )
+        except (TypeError, ValueError):
+            end_date = None
+
+        entities = await self.db.named_entities.group_by_name_and_src(
+            src_id=src_id,
+            entity_id=entity_id,
+            start_date=start_date,
+            end_date=end_date,
+        )
+        return json_response(entities.dict(), status=HTTPStatus.OK)
 
 
 #

@@ -18,11 +18,7 @@ class ArticleManager(BaseModelManager):
     async def all_by_src(self, src_id: int) -> List[Article]:
         async with self.engine.connect() as conn:
             result = await conn.execute(
-                select(
-                    self.model_table
-                ).where(
-                    self.model_table.c.src_id == src_id
-                )
+                select(self.model_table).where(self.model_table.c.src_id == src_id)
             )
             return [Article(**data) for data in result.mappings().all()]
 

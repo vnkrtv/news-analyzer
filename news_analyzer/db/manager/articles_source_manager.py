@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from sqlalchemy import text
+from sqlalchemy import text, select
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from news_analyzer.db.models.articles_source import ArticlesSource
@@ -14,3 +14,10 @@ class ArticlesSourceManager(BaseModelManager):
 
     async def all(self) -> List[ArticlesSource]:
         return [ArticlesSource(**data) for data in await self._all()]
+
+    async def all_by_type(self, src_type: str) -> List[ArticlesSource]:
+        async with self.engine.connect() as conn:
+            result = await conn.execute(
+                select(self.model_table).where(self.model_table.c.src_type == src_type)
+            )
+            return [ArticlesSource(**data) for data in result.mappings().all()]

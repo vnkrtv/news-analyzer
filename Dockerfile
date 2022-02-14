@@ -9,7 +9,8 @@ RUN /usr/share/python3/venv/bin/pip install /mnt/
 FROM snakepacker/python:3.8 as base
 
 COPY --from=builder /usr/share/python3/venv /usr/share/python3/venv
-RUN ln -snf /usr/share/python3/venv/bin/yaps* /usr/local/bin/
+RUN ln -snf /usr/share/python3/venv/bin/news-analyzer* /usr/local/bin/ \
+ && ln -snf /usr/share/python3/venv/bin/dostoevsky /usr/local/bin/
 
 COPY deploy/entrypoint /entrypoint
 

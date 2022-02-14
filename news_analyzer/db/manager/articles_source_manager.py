@@ -3,7 +3,7 @@ from typing import Optional, List
 from sqlalchemy import text, select
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from news_analyzer.db.models.articles_source import ArticlesSource
+from news_analyzer.db.models.articles_source import ArticlesSource, InputArticlesSource
 from news_analyzer.db.schema import articles_sources_table
 from news_analyzer.db.manager.base_manager import BaseModelManager
 
@@ -21,3 +21,6 @@ class ArticlesSourceManager(BaseModelManager):
                 select(self.model_table).where(self.model_table.c.src_type == src_type)
             )
             return [ArticlesSource(**data) for data in result.mappings().all()]
+
+    async def create(self, src: InputArticlesSource) -> None:
+        await self._create(src.dict())

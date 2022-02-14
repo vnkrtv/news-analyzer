@@ -1,9 +1,10 @@
 import time
+from typing import List
 
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from news_analyzer.db.db_manager import DBManager
-from news_analyzer.db.models.articles_source import ArticlesSource
+from news_analyzer.db.models.articles_source import ArticlesSource, InputArticlesSource
 from news_analyzer.db.schema import TextSourceType
 from news_analyzer.modules.task_processor.schemas.load_text_task_description import (
     LoadTextTaskDescription,
@@ -12,6 +13,7 @@ from news_analyzer.modules.task_processor.schemas.task import Task
 from news_analyzer.modules.task_processor.schemas.task_type import TaskType
 from news_analyzer.modules.task_processor.task_processor import TaskProcessor
 from news_analyzer.settings import Config
+from news_analyzer.text_sources_config import TEXT_SOURCES_CONFIG
 
 
 def get_task_type(src_type: TextSourceType) -> str:
@@ -29,6 +31,17 @@ def get_task_description(source: ArticlesSource) -> dict:
         ).dict()
 
 
+def get_sources_from_config() -> List[InputArticlesSource]:
+    return [
+        InputArticlesSource(
+            name=src_name,
+            src_type=src_config["info"]["src_type"],
+            src=src_config["info"]["src"],
+        )
+        for src_name, src_config in TEXT_SOURCES_CONFIG.items()
+    ]
+
+
 async def run_task_producer():
     engine = create_async_engine(
         f"postgresql+asyncpg://{Config.DB.url}",
@@ -40,6 +53,14 @@ async def run_task_producer():
 
     db = DBManager(engine=engine)
     task_processor = TaskProcessor(db=db)
+
+    for src in get_sources_from_config():
+        try:
+            await db.articles_sources.create(src)
+        except:
+            # we can use upsert statement to avoid errors on duplicate key
+            # but in that case we have to write an implementation tied to a specific DBMS
+            pass
 
     while True:
         for source in await db.articles_sources.all():

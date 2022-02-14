@@ -15,6 +15,8 @@ class NamedEntityTonality(BaseSchema):
     mean_skip_sentiment: float
     mean_speech_sentiment: float
 
+    count: int
+
 
 class NamedEntityTonalityWithSource(NamedEntityTonality):
     src_name: str

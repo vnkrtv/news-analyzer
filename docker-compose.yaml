@@ -20,8 +20,8 @@ services:
 
   api:
     build: .
-    image: yaps-api:0.0.1
-    container_name: yaps-web
+    image: news-analyzer-api:0.0.1
+    container_name: news-analyzer-api
     env_file:
       - ./deploy/.env.prod
     environment:
@@ -31,7 +31,6 @@ services:
       - POSTGRES_HOSTS=db
       - CACHE_TYPE=redis
       - REDIS_URL=redis://cache:6379/0
-      - ES_HOSTS=elasticsearch:9200
       - ECHO_DB=y
       - ECHO_POOL=y
     ports:
@@ -44,15 +43,20 @@ services:
     networks:
       - news-analyzer-net
 
-  task-processor:
+  data-loader:
     build: .
-    image: task-processor:0.0.1
+    image: news-analyzer-api:0.0.1
     container_name: task-processor
     env_file:
       - ./deploy/.env.prod
     environment:
       - POSTGRES_HOSTS=db
-    entrypoint: run-task-processor
+    entrypoint: dostoevsky download fasttext-social-network-model && news-analyzer-run-load-tasks
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
     depends_on:
       - api
     networks:

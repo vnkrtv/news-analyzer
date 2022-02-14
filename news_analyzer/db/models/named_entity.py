@@ -8,8 +8,5 @@ class InputNamedEntity(BaseSchema):
     entity_type: NERType
 
 
-class NamedEntity(BaseSchema):
+class NamedEntity(InputNamedEntity):
     entity_id: int
-    article_id: int
-    name: str
-    entity_type: NERType

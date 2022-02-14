@@ -19,7 +19,7 @@ class GetArticleSources(BaseHandler):
     @cache()
     async def get(self) -> web.Response:
         """
-        /v1/sources/?[type=<str>]
+        /sources/?[type=<str>]
         Get article sources
         """
 
@@ -38,19 +38,7 @@ class GetArticles(BaseHandler):
     @cache()
     async def get(self, src_id: int) -> web.Response:
         """
-        /source/{src_id:<int>}/articles/?[limit=<int>&cursor=<int>]
-        Get articles by source name
-        """
-
-        articles = await self.db.articles.all_by_src(src_id=src_id)
-        return json_response([_.dict() for _ in articles], status=HTTPStatus.OK)
-
-
-class NamedEntitiesApi(BaseHandler):
-    @cache()
-    async def get(self, src_id: int) -> web.Response:
-        """
-        /source/{src_id:<int>}/articles/?[limit=<int>&cursor=<int>]
+        /source/{src_id:<int>}/articles?[limit=<int>&cursor=<int>]
         Get articles by source name
         """
 
@@ -61,7 +49,7 @@ class NamedEntitiesApi(BaseHandler):
 class GetNamedEntitiesTonality(BaseHandler):
     async def get(self) -> web.Response:
         """
-        /analyze/entities/all?[src_id=<int>&entity_id=<int>&start_date_ts=<int>&end_date_ts=<int>]
+        /analyze/entities?[src_id=<int>&name=<str>&start_date_ts=<int>&end_date_ts=<int>]
         Get articles by source name
         """
 
@@ -69,11 +57,6 @@ class GetNamedEntitiesTonality(BaseHandler):
             src_id = int(self.request.query.get("src_id"))
         except (TypeError, ValueError):
             src_id = None
-
-        try:
-            entity_id = int(self.request.query.get("entity_id"))
-        except (TypeError, ValueError):
-            entity_id = None
 
         try:
             start_date = datetime.fromtimestamp(
@@ -89,9 +72,11 @@ class GetNamedEntitiesTonality(BaseHandler):
         except (TypeError, ValueError):
             end_date = None
 
+        entity_name = self.request.query.get("name")
+
         entities = await self.db.named_entities.group_by_name(
             src_id=src_id,
-            entity_id=entity_id,
+            entity_name=entity_name,
             start_date=start_date,
             end_date=end_date,
         )
@@ -101,7 +86,7 @@ class GetNamedEntitiesTonality(BaseHandler):
 class GetNamedEntitiesTonalityBySources(BaseHandler):
     async def get(self) -> web.Response:
         """
-        /analyze/entities/group_by_sources{entity_id:<int>}?[src_id=<int>&entity_id=<int>&start_date_ts=<int>&end_date_ts=<int>]
+        /analyze/entities/group_by_sources?[src_id=<int>&name=<str>&start_date_ts=<int>&end_date_ts=<int>]
         Get articles by source name
         """
 
@@ -109,11 +94,6 @@ class GetNamedEntitiesTonalityBySources(BaseHandler):
             src_id = int(self.request.query.get("src_id"))
         except (TypeError, ValueError):
             src_id = None
-
-        try:
-            entity_id = int(self.request.query.get("entity_id"))
-        except (TypeError, ValueError):
-            entity_id = None
 
         try:
             start_date = datetime.fromtimestamp(
@@ -129,9 +109,11 @@ class GetNamedEntitiesTonalityBySources(BaseHandler):
         except (TypeError, ValueError):
             end_date = None
 
+        entity_name = self.request.query.get("name")
+
         entities = await self.db.named_entities.group_by_name_and_src(
             src_id=src_id,
-            entity_id=entity_id,
+            entity_name=entity_name,
             start_date=start_date,
             end_date=end_date,
         )

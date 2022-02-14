@@ -42,14 +42,14 @@ class NamedEntityManager(BaseModelManager):
     async def group_by_name(
         self,
         src_id: Optional[int] = None,
-        entity_id: Optional[int] = None,
+        entity_name: Optional[str] = None,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
     ) -> NamedEntityTonalityList:
         sql, params = self._get_group_by_sql(
             group_by_src=False,
             src_id=src_id,
-            entity_id=entity_id,
+            entity_name=entity_name,
             start_date=start_date,
             end_date=end_date,
         )
@@ -66,14 +66,14 @@ class NamedEntityManager(BaseModelManager):
     async def group_by_name_and_src(
         self,
         src_id: int,
-        entity_id: Optional[int] = None,
+        entity_name: Optional[str] = None,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
     ) -> NamedEntityTonalityWithSourceList:
         sql, params = self._get_group_by_sql(
             group_by_src=True,
             src_id=src_id,
-            entity_id=entity_id,
+            entity_name=entity_name,
             start_date=start_date,
             end_date=end_date,
         )
@@ -92,16 +92,16 @@ class NamedEntityManager(BaseModelManager):
         self,
         group_by_src: bool,
         src_id: Optional[int] = None,
-        entity_id: Optional[int] = None,
+        entity_name: Optional[str] = None,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
     ) -> Tuple[text, Dict[str, Any]]:
         where_condition, params = self._get_where_condition(
             date_col="a.date",
             src_id_col="a_s.src_id",
-            entity_id_col="n_e.entity_id",
+            entity_name_col="n_e.name",
             src_id=src_id,
-            entity_id=entity_id,
+            entity_name=entity_name,
             start_date=start_date,
             end_date=end_date,
         )
@@ -117,7 +117,8 @@ class NamedEntityManager(BaseModelManager):
                    avg(a.negative_sentiment) AS "mean_negative_sentiment",
                    avg(a.positive_sentiment) AS "mean_positive_sentiment",
                    avg(a.skip_sentiment)     AS "mean_skip_sentiment",
-                   avg(a.speech_sentiment)   AS "mean_speech_sentiment"
+                   avg(a.speech_sentiment)   AS "mean_speech_sentiment",
+                   count(*)                  AS "count"
             FROM named_entities n_e
             INNER JOIN articles a ON n_e.article_id = a.article_id
             INNER JOIN articles_sources a_s on a.src_id = a_s.src_id
@@ -149,44 +150,41 @@ class NamedEntityManager(BaseModelManager):
         self,
         date_col: str,
         src_id_col: str,
-        entity_id_col: str,
+        entity_name_col: str,
         src_id: Optional[int] = None,
-        entity_id: Optional[int] = None,
+        entity_name: Optional[str] = None,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
     ) -> Tuple[Optional[str], Dict[str, Any]]:
         date_condition, params = self._get_date_condition(
             date_col, start_date, end_date
         )
-        if entity_id:
-            params["entity_id"] = entity_id
+        if entity_name:
+            params["entity_name"] = entity_name
         if src_id:
             params["src_id"] = src_id
 
         where_condition = None
         if src_id:
             if date_condition:
-                if entity_id:
-                    where_condition = f"WHERE {src_id_col} = :src_id AND {date_condition} AND {entity_id_col} = :entity_id"
+                if entity_name:
+                    where_condition = (
+                        f"WHERE {src_id_col} = :src_id AND {date_condition} AND strpos({entity_name_col},"
+                        f":entity_name) != 0 "
+                    )
                 else:
                     where_condition = (
                         f"WHERE {src_id_col} = :src_id AND {date_condition}"
                     )
             else:
-                if entity_id:
-                    where_condition = (
-                        f"WHERE {src_id_col} AND {entity_id_col} = :entity_id"
-                    )
+                if entity_name:
+                    where_condition = f"WHERE {src_id_col} AND strpos({entity_name_col}, :entity_name) != 0"
                 else:
-                    where_condition = (
-                        f"WHERE {src_id_col} AND {entity_id_col} = :entity_id"
-                    )
+                    where_condition = f"WHERE {src_id_col} AND strpos({entity_name_col}, :entity_name) != 0"
 
         elif date_condition:
-            if entity_id:
-                where_condition = (
-                    f"WHERE {date_condition} AND {entity_id_col} = :entity_id"
-                )
+            if entity_name:
+                where_condition = f"WHERE {date_condition} AND strpos({entity_name_col}, :entity_name) != 0"
             else:
                 where_condition = f"WHERE {date_condition}"
         return where_condition, params

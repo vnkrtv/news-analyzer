@@ -1,3 +1,5 @@
+from news_analyzer.db.schema import TextSourceType
+
 from news_analyzer import text_sources
 from news_analyzer.modules.loader.web_loader import WebLoader
 from news_analyzer.modules.ner_extractor.natasha_ner_extractor import (
@@ -15,5 +17,6 @@ TEXT_SOURCES_CONFIG = {
         "text_parser": text_sources.meduza.MeduzaArticleParser,
         "ner_extractor": NatashaNerExtractor,
         "tonality_determinant": DostoevskyTonalityDeterminant,
+        "info": {"src_type": TextSourceType.rss, "src": "https://meduza.io/rss2/all"},
     }
 }

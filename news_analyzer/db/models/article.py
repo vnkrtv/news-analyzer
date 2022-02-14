@@ -15,14 +15,5 @@ class InputArticle(BaseSchema):
     speech_sentiment: float
 
 
-class Article(BaseSchema):
+class Article(InputArticle):
     article_id: int
-    src_id: int
-    title: str
-    text: str
-    date: datetime
-    neutral_sentiment: float
-    negative_sentiment: float
-    positive_sentiment: float
-    skip_sentiment: float
-    speech_sentiment: float

@@ -6,6 +6,7 @@ from pkg_resources import parse_requirements
 from setuptools import find_packages, setup
 
 module_name = 'news_analyzer'
+cmd_prefix = 'news-analyzer'
 
 module = SourceFileLoader(
     module_name, os.path.join(module_name, '__init__.py')
@@ -36,9 +37,9 @@ setup(
     extras_require={'dev': load_requirements('requirements.dev.txt')},
     entry_points={
         'console_scripts': [
-            '{0}-api = {0}.__main__:main'.format(module_name),
-            '{0}-db = {0}.db.__main__:main'.format(module_name),
-            'run-task-processor = {0}.modules.task_processor.__main__:main'.format(module_name)
+            '{0}-api = {1}.__main__:main'.format(cmd_prefix, module_name),
+            '{0}-db = {1}.db.__main__:main'.format(cmd_prefix, module_name),
+            '{0}-run-load-tasks = {1}.modules.task_processor.__main__:main'.format(cmd_prefix, module_name)
         ]
     },
     include_package_data=True

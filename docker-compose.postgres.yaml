@@ -18,7 +18,7 @@ services:
     networks:
       - news-analyzer-net
 
-  yaps:
+  api:
     build: .
     image: yaps-api:0.0.1
     container_name: yaps-web
@@ -41,7 +41,6 @@ services:
     depends_on:
       - db
       - cache
-      - elasticsearch
     networks:
       - news-analyzer-net
 
@@ -55,9 +54,7 @@ services:
       - POSTGRES_HOSTS=db
     entrypoint: run-task-processor
     depends_on:
-      - db
-      - cache
-      - rmq
+      - api
     networks:
       - news-analyzer-net
 

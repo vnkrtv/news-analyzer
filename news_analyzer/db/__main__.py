@@ -4,7 +4,7 @@ import sys
 
 from alembic.config import CommandLine, Config as AlembicConfig
 
-from yaps.settings import Config
+from news_analyzer.settings import Config
 
 
 def main():

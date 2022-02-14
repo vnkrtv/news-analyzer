@@ -1,4 +1,6 @@
-# Diplom  
+# Articles analyzer  
+
+
 
 ## Installation 
 

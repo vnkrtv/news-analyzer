@@ -1,5 +1,10 @@
+import json
+
 from pydantic import BaseModel
 
 
 class BaseSchema(BaseModel):
-    pass
+
+    class Config:
+        json_loads = json.loads
+        json_dumps = json.dumps

@@ -1,0 +1,66 @@
+version: '3'
+
+services:
+
+  db:
+    image: yandex/clickhouse-server:21.3.20.1
+    container_name: news-analyzer-db
+    env_file:
+      - ./deploy/.env.prod
+    volumes:
+      - news-analyzer-db-data:/var/lib/clickhouse
+    networks:
+      - news-analyzer-net
+
+  cache:
+    image: redis:6.2.6
+    container_name: news-analyzer-cache
+    networks:
+      - news-analyzer-net
+
+  api:
+    build: .
+    image: yaps-api:0.0.1
+    container_name: yaps-web
+    env_file:
+      - ./deploy/.env.prod
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8080
+      - WORKERS_NUM=2
+      - POSTGRES_HOSTS=db
+      - CACHE_TYPE=redis
+      - REDIS_URL=redis://cache:6379/0
+      - ES_HOSTS=elasticsearch:9200
+      - ECHO_DB=y
+      - ECHO_POOL=y
+    ports:
+      - 8080:8080
+    volumes:
+      - /var/log/nginx:/var/log/nginx
+    depends_on:
+      - db
+      - cache
+    networks:
+      - news-analyzer-net
+
+  task-processor:
+    build: .
+    image: task-processor:0.0.1
+    container_name: task-processor
+    env_file:
+      - ./deploy/.env.prod
+    environment:
+      - POSTGRES_HOSTS=db
+    entrypoint: run-task-processor
+    depends_on:
+      - api
+    networks:
+      - news-analyzer-net
+
+
+volumes:
+  news-analyzer-db-data:
+
+networks:
+  news-analyzer-net:
